@@ -125,7 +125,9 @@ def cli():
         help="Bump to next patch with dev suffix (x.y.z → x.y.z+1.dev0)",
     )
     group.add_argument(
-        "--manual-version", action="store_true", help="Don't auto-increment based on release type"
+        "--manual-version",
+        action="store_true",
+        help="Don't auto-increment based on release type",
     )
     parser.add_argument(
         "--dry-run",

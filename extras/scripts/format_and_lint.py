@@ -7,19 +7,42 @@ this_directory = Path(__file__).parent
 project_root = this_directory.parent.parent
 
 
-def run(cmd, check=True):
+def run(cmd):
     print(f"Running: {cmd}")
-    subprocess.run(cmd, shell=True, check=check, cwd=project_root)
+    return subprocess.run(
+        cmd,
+        shell=True,
+        text=True,
+        cwd=project_root,
+        stderr=subprocess.STDOUT,
+        stdout=subprocess.PIPE,
+        check=False,
+    )
 
 
-def main(directories: list[str]):
+def main(directories: list[str], test_mode: bool):
     dir_arg = " ".join(directories)
-    run(f"ruff check {dir_arg} --fix")
-    run(f"ruff format {dir_arg}")
+    check_test_arg, format_test_arg = "", ""
+    if test_mode:
+        check_test_arg = "--exit-non-zero-on-fix"
+        format_test_arg = "--check --exit-non-zero-on-fix"
+
+    check_process = run(f"ruff check --show-fixes --fix {check_test_arg} {dir_arg}")
+    if check_process.returncode != 0:
+        print(f"::error:: ruff check encountered changes: {check_process.stdout}")
+
+    format_process = run(f"ruff format {format_test_arg} {dir_arg}")
+    if format_process.returncode != 0:
+        print(f"::error:: ruff format encountered changes: {format_process.stdout}")
 
 
 def cli():
-    parser = ArgumentParser()
+    parser = ArgumentParser( )
+    parser.add_argument(
+        "--test",
+        action="store_true",
+        help="Exits with error if ruff needs to make changes",
+    )
     parser.add_argument(
         "--directories",
         nargs="+",
@@ -34,9 +57,10 @@ def cli():
         raise ValueError(
             f"Some directories are not accessible: {paths_str}. "
             f"Did forget to install this pacakge with 'pip install -e'?"
+            f""
         )
 
-    main(args.directories)
+    main(directories=args.directories, test_mode=args.test)
 
 
 if __name__ == "__main__":
