@@ -2,7 +2,7 @@ from pathlib import Path
 import yaml
 from sqlmodel import create_engine, Field, Relationship, Session, select
 from sqlalchemy.orm import selectinload
-from yaml_model import YAMLModel
+from sqlmodel_yaml import YAMLModel
 
 db_path = Path(__file__).parent / "database.db"
 sqlite_file_name = db_path.relative_to(Path().cwd()).as_posix()
