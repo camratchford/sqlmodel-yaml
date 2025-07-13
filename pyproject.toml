@@ -2,7 +2,7 @@
 
 [project]
 name = 'sqlmodel-yaml'
-dynamic = ["version"]
+version = "0.1.0"
 description = 'SQLModel models with dynamically generated PyYAML Constructors and Representors'
 readme = "README.md"
 
