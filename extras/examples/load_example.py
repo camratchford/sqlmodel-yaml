@@ -116,20 +116,18 @@ def load_cities_then_countries():
             session.commit()
             session.refresh(country)
 
-    countries = session.exec(
-        select(Country)
-    ).all()
+    countries = session.exec(select(Country)).all()
     print(countries)
 
-    cities = session.exec(
-        select(City)
-    ).all()
+    cities = session.exec(select(City)).all()
     print(cities)
 
 
 def load_cities_with_countries_nested():
     with Session(engine) as session:
-        cities_with_countries = yaml.load(city_data_yaml_with_country, Loader=yaml.FullLoader)
+        cities_with_countries = yaml.load(
+            city_data_yaml_with_country, Loader=yaml.FullLoader
+        )
         for city in cities_with_countries:
             # Replace the inlined Country with one from the DB, if it exists
             existing_country = session.exec(
@@ -143,14 +141,10 @@ def load_cities_with_countries_nested():
             session.commit()
             session.refresh(city)
 
-    countries = session.exec(
-        select(Country)
-    ).all()
+    countries = session.exec(select(Country)).all()
     print(countries)
 
-    cities = session.exec(
-        select(City)
-    ).all()
+    cities = session.exec(select(City)).all()
     print(cities)
 
 

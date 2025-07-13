@@ -39,6 +39,8 @@ dependencies = [
 
 [project.optional-dependencies]
 development = [
+    "setuptools",
+    "wheel",
     "pydantic[email]",
     "mkdocs",
     "mkdocs-material",
@@ -57,14 +59,19 @@ development = [
 Homepage = 'https://github.com/camratchford/sqlmodel-yaml'
 Source =  'https://github.com/camratchford/sqlmodel-yaml'
 
+[project.scripts]
+sqlmodel-yaml-version-bump = "sqlmodel_yaml.scripts.bump_version:cli"
+sqlmodel-yaml-build-and-publish = "sqlmodel_yaml.scripts.build_and_publish:cli"
+sqlmodel-yaml-format-and-lint = "sqlmodel_yaml.scripts.format_and_lint:cli"
+sqlmodel-yaml-run-tests = "sqlmodel_yaml.scripts.run_tests:cli"
 
 [build-system]
 requires = ["setuptools", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["sqlmodel_yaml"]
-package-dir = {"sqlmodel_yaml" = "sqlmodel_yaml"}
+packages = ["sqlmodel_yaml", "sqlmodel_yaml.scripts"]
+package-dir = {"sqlmodel_yaml" = "sqlmodel_yaml", "sqlmodel_yaml.scripts" = "extras/scripts"}
 
 [tool.ruff]
 exclude = [
