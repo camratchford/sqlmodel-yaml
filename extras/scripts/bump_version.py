@@ -73,11 +73,11 @@ def create_release(version: str, github_token: str):
 
 
 def git_tag(version: str):
-    add_process = run(f"git add {pyproject_dot_toml}")
-    commit_process = run(f'git commit -m "Release {version}"')
-    tag_process = run(f"git tag v{version}")
-    push_process = run("git push")
-    push_tag_process = run(f"git push origin v{version}")
+    run(f"git add {pyproject_dot_toml}")
+    run(f'git commit -m "Release {version}"')
+    run(f"git tag v{version}")
+    run("git push")
+    run(f"git push origin v{version}")
 
 
 def main(
