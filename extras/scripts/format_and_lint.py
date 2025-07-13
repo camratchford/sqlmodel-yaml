@@ -41,7 +41,7 @@ def main(directories: list[str], test_mode: bool):
 
 
 def cli():
-    parser = ArgumentParser( )
+    parser = ArgumentParser()
     parser.add_argument(
         "--test",
         action="store_true",

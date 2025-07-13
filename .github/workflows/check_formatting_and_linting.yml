@@ -1,4 +1,4 @@
-name: Check Version Update
+name: Check formatting and linting
 
 on:
   pull_request:
