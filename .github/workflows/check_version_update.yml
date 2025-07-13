@@ -7,13 +7,10 @@ on:
       - synchronize
     branches:
       - main
-    paths:
-      - "pyproject.toml"
 
 jobs:
   check-version-updated:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout the PR branch
         uses: actions/checkout@v4
