@@ -80,6 +80,7 @@ def main(
     patch_release: bool,
     minor_release: bool,
     major_release: bool,
+    manual_version: bool,
     dry_run: bool = False,
     no_release: bool = False,
 ) -> None:
@@ -92,8 +93,11 @@ def main(
         if major_release
         else "dev"
     )
+
     current_version = get_current_version()
-    new_version = get_new_version(current_version, kind)
+    new_version = current_version
+    if not manual_version:
+        new_version = get_new_version(current_version, kind)
 
     print(f"Bumping version: {current_version} → {new_version}")
     if not dry_run:
@@ -120,6 +124,9 @@ def cli():
         action="store_true",
         help="Bump to next patch with dev suffix (x.y.z → x.y.z+1.dev0)",
     )
+    group.add_argument(
+        "--manual-version", action="store_true", help="Don't auto-increment based on release type"
+    )
     parser.add_argument(
         "--dry-run",
         action="store_true",
@@ -128,6 +135,7 @@ def cli():
     parser.add_argument(
         "--no-release", action="store_true", help="Skip doing a github release"
     )
+
     args = parser.parse_args()
 
     main(
@@ -136,6 +144,7 @@ def cli():
         major_release=args.major,
         dry_run=args.dry_run,
         no_release=args.no_release,
+        manual_version=args.manual_version,
     )
 
 
