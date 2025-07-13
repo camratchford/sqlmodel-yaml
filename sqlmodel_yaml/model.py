@@ -27,14 +27,14 @@ class YAMLModel(SQLModel, table=False):
                     data[attr] = value
 
                 # List of related models (e.g., Country.cities)
-                elif isinstance(value, list) and value and all(isinstance(v, YAMLModel) for v in value):
+                elif (
+                    isinstance(value, list)
+                    and value
+                    and all(isinstance(v, YAMLModel) for v in value)
+                ):
                     data[attr] = value
 
-            return dumper.represent_mapping(
-                f"!{cls.__name__}",
-                data,
-                flow_style=False
-            )
+            return dumper.represent_mapping(f"!{cls.__name__}", data, flow_style=False)
 
         return wrapper
 

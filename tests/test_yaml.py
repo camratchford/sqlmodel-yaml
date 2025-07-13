@@ -1,4 +1,3 @@
-
 import yaml
 from sqlmodel import Session, select
 
@@ -11,7 +10,7 @@ from mocks import (
     city_data_yaml,
     city_data_dict,
     City,
-    valid_merged_city_yaml
+    valid_merged_city_yaml,
 )
 from sqlalchemy.orm import selectinload
 
@@ -43,9 +42,7 @@ def test_yaml_dump():
             session.refresh(city)
 
     with Session(engine) as session:
-        cities = session.exec(
-            select(City).options(selectinload(City.country))
-        ).all()
+        cities = session.exec(select(City).options(selectinload(City.country))).all()
         yaml_from_cities = yaml.dump(cities)
         assert valid_merged_city_yaml == yaml_from_cities
 

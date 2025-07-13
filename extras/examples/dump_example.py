@@ -2,7 +2,7 @@ from pathlib import Path
 import yaml
 from sqlmodel import create_engine, Field, Relationship, Session, select
 from sqlalchemy.orm import selectinload
-from yaml_model import YAMLModel
+from sqlmodel_yaml import YAMLModel
 
 db_path = Path(__file__).parent / "database.db"
 sqlite_file_name = db_path.relative_to(Path().cwd()).as_posix()
@@ -65,7 +65,6 @@ create_db_and_tables()
 if __name__ == "__main__":
     # From a list of dicts (like when used in a fastapi route)
     with Session(engine) as session:
-
         for country_data in country_data_dict:
             country = Country(**country_data)
             session.add(country)
@@ -81,16 +80,12 @@ if __name__ == "__main__":
     with Session(engine) as session:
         # Necessary to retrieve the `City.country` one-one relationship's backref,
         # can be used to initialize both Cities and Countries at the same time
-        cities = session.exec(
-            select(City).options(selectinload(City.country))
-        ).all()
+        cities = session.exec(select(City).options(selectinload(City.country))).all()
         yaml_from_cities = yaml.dump(cities)
         print(yaml_from_cities)
 
         # We don't want to store the `Country.cities` one-many relationship's backref as YAML, it's a lot of data.
         # Plus, it won't do you any good
-        countries = session.exec(
-            select(Country)
-        ).all()
+        countries = session.exec(select(Country)).all()
         yaml_from_countries = yaml.dump(countries)
         print(yaml_from_countries)

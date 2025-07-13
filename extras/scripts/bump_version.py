@@ -21,17 +21,6 @@ def get_current_version() -> Version:
     return Version(match.group(1))
 
 
-def set_new_version(new_version: str):
-    content = pyproject_dot_toml.read_text()
-    new_content = re.sub(
-        r'(^version\s*=\s*["\'])(.+?)(["\'])',
-        rf"\1{new_version}\3",
-        content,
-        flags=re.MULTILINE,
-    )
-    pyproject_dot_toml.write_text(new_content)
-
-
 def get_new_version(version: Version, kind: str) -> str:
     if kind == "patch":
         return f"{version.major}.{version.minor}.{version.micro + 1}"
@@ -45,9 +34,20 @@ def get_new_version(version: Version, kind: str) -> str:
         sys.exit(f"Invalid bump type: {kind}")
 
 
+def set_new_version(new_version: str):
+    content = pyproject_dot_toml.read_text()
+    new_content = re.sub(
+        r'(^version\s*=\s*["\'])(.+?)(["\'])',
+        rf'version = "{new_version}"',
+        content,
+        flags=re.MULTILINE,
+    )
+    pyproject_dot_toml.write_text(new_content)
+
+
 def run(cmd, check=True):
     print(f"Running: {cmd}")
-    subprocess.run(cmd, shell=True, check=check)
+    subprocess.run(cmd, shell=True, check=check, cwd=project_root)
 
 
 def create_release(version):
@@ -80,28 +80,34 @@ def main(
     patch_release: bool,
     minor_release: bool,
     major_release: bool,
+    manual_version: bool,
     dry_run: bool = False,
+    no_release: bool = False,
 ) -> None:
     kind = (
-        "patch" if patch_release
-        else
-        "minor" if minor_release
-        else
-        "major" if major_release
-        else
-        "dev"
+        "patch"
+        if patch_release
+        else "minor"
+        if minor_release
+        else "major"
+        if major_release
+        else "dev"
     )
+
     current_version = get_current_version()
-    new_version = get_new_version(current_version, kind)
+    new_version = current_version
+    if not manual_version:
+        new_version = get_new_version(current_version, kind)
 
     print(f"Bumping version: {current_version} → {new_version}")
     if not dry_run:
         set_new_version(new_version)
         git_tag(new_version)
-        create_release(new_version)
+        if not no_release:
+            create_release(new_version)
 
 
-if __name__ == "__main__":
+def cli():
     parser = argparse.ArgumentParser(description="Bump version and create release.")
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument(
@@ -118,9 +124,20 @@ if __name__ == "__main__":
         action="store_true",
         help="Bump to next patch with dev suffix (x.y.z → x.y.z+1.dev0)",
     )
-    parser.add_argument(
-        "--dry-run", action="store_true", help="Only show log messages, do not modify version in any way"
+    group.add_argument(
+        "--manual-version",
+        action="store_true",
+        help="Don't auto-increment based on release type",
     )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Only show log messages, do not modify version in any way",
+    )
+    parser.add_argument(
+        "--no-release", action="store_true", help="Skip doing a github release"
+    )
+
     args = parser.parse_args()
 
     main(
@@ -128,4 +145,10 @@ if __name__ == "__main__":
         minor_release=args.minor,
         major_release=args.major,
         dry_run=args.dry_run,
+        no_release=args.no_release,
+        manual_version=args.manual_version,
     )
+
+
+if __name__ == "__main__":
+    cli()

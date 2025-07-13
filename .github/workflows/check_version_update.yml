@@ -1,0 +1,38 @@
+name: Check version update
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+    branches:
+      - main
+
+jobs:
+  check-version-updated:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the PR branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get base branch
+        id: base
+        run: echo "BASE_BRANCH=${{ github.event.pull_request.base.ref }}" >> $GITHUB_OUTPUT
+
+      - name: Get version before and after
+        run: |
+          git show origin/main:pyproject.toml > pyproject_main.toml
+          BASE_VERSION=$(grep '^version' pyproject_main.toml | head -1 | cut -d'"' -f2)
+          HEAD_VERSION=$(grep '^version' pyproject.toml | head -1 | cut -d'"' -f2)
+
+          echo "Main version: $BASE_VERSION"
+          echo "PR version:   $HEAD_VERSION"
+
+          if [ "$BASE_VERSION" = "$HEAD_VERSION" ]; then
+            echo "::error file=pyproject.toml,line=4::Version must be updated"
+            exit 1
+          else
+            echo "✅ Version has been updated."
+          fi
