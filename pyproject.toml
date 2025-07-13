@@ -2,13 +2,14 @@
 
 [project]
 name = 'sqlmodel-yaml'
-version = "0.1.0"
+\"0.1.1.dev0\"
 description = 'SQLModel models with dynamically generated PyYAML Constructors and Representors'
 readme = "README.md"
 
 authors = [
     {name = 'Cam Ratchford', email = 'camratchford@gmail.com'},
 ]
+
 classifiers = [
     'Development Status :: 3 - Alpha',
     'Programming Language :: Python',
