@@ -59,7 +59,6 @@ def run(cmd):
 
 
 def create_release(version: str, github_token: str):
-
     github_client = Github(github_token)
     github_repo = github_client.get_repo("camratchford/sqlmodel-yaml")
 
@@ -142,9 +141,7 @@ def cli():
         action="store_true",
         help="Only show log messages, do not modify version in any way",
     )
-    parser.add_argument(
-        "--do-release", action="store_true", help="Do a GitHub release"
-    )
+    parser.add_argument("--do-release", action="store_true", help="Do a GitHub release")
 
     args = parser.parse_args()
 
