@@ -1,7 +1,7 @@
 import subprocess
 from argparse import ArgumentParser
 from pathlib import Path
-
+from sys import exit
 
 this_directory = Path(__file__).parent
 project_root = this_directory.parent.parent
@@ -28,12 +28,16 @@ def main(directories: list[str], test_mode: bool):
         format_test_arg = "--check --exit-non-zero-on-fix"
 
     check_process = run(f"ruff check --show-fixes --fix {check_test_arg} {dir_arg}")
-    if check_process.returncode != 0:
-        print(f"::error:: ruff check encountered changes: {check_process.stdout}")
-
     format_process = run(f"ruff format {format_test_arg} {dir_arg}")
-    if format_process.returncode != 0:
-        print(f"::error:: ruff format encountered changes: {format_process.stdout}")
+
+    # return code will be zero if both pass
+    if test_mode:
+        if check_process.returncode != 0:
+            print(f"::error:: ruff check encountered changes: {check_process.stdout}")
+        if format_process.returncode != 0:
+            print(f"::error:: ruff format encountered changes: {format_process.stdout}")
+
+        exit(check_process.returncode + format_process.returncode)
 
 
 def cli():
