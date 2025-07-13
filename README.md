@@ -1,5 +1,5 @@
 
-# YAMLModel
+# SQLModel-YAML
 
 > [SQLModel](https://sqlmodel.tiangolo.com/) models with dynamically generated PyYaml Constructors and Representers
 

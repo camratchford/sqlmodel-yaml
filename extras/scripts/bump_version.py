@@ -45,16 +45,20 @@ def set_new_version(new_version: str):
     pyproject_dot_toml.write_text(new_content)
 
 
-def run(cmd, check=True):
+def run(cmd):
     print(f"Running: {cmd}")
-    subprocess.run(cmd, shell=True, check=check, cwd=project_root)
+    return subprocess.run(
+        cmd,
+        shell=True,
+        text=True,
+        cwd=project_root,
+        stderr=subprocess.STDOUT,
+        stdout=subprocess.PIPE,
+        check=False,
+    )
 
 
-def create_release(version):
-    github_token = getenv("GITHUB_TOKEN")
-    if not github_token:
-        raise RuntimeError("GITHUB_TOKEN environment variable not set")
-
+def create_release(version: str, github_token: str):
     github_client = Github(github_token)
     github_repo = github_client.get_repo("camratchford/sqlmodel-yaml")
 
@@ -82,7 +86,7 @@ def main(
     major_release: bool,
     manual_version: bool,
     dry_run: bool = False,
-    no_release: bool = False,
+    do_release: bool = False,
 ) -> None:
     kind = (
         "patch"
@@ -93,6 +97,9 @@ def main(
         if major_release
         else "dev"
     )
+    github_token = getenv("GITHUB_TOKEN")
+    if do_release and not github_token:
+        raise RuntimeError("GITHUB_TOKEN environment variable not set")
 
     current_version = get_current_version()
     new_version = current_version
@@ -103,8 +110,8 @@ def main(
     if not dry_run:
         set_new_version(new_version)
         git_tag(new_version)
-        if not no_release:
-            create_release(new_version)
+        if do_release:
+            create_release(new_version, github_token)
 
 
 def cli():
@@ -134,9 +141,7 @@ def cli():
         action="store_true",
         help="Only show log messages, do not modify version in any way",
     )
-    parser.add_argument(
-        "--no-release", action="store_true", help="Skip doing a github release"
-    )
+    parser.add_argument("--do-release", action="store_true", help="Do a GitHub release")
 
     args = parser.parse_args()
 
@@ -145,7 +150,7 @@ def cli():
         minor_release=args.minor,
         major_release=args.major,
         dry_run=args.dry_run,
-        no_release=args.no_release,
+        do_release=args.do_release,
         manual_version=args.manual_version,
     )
 

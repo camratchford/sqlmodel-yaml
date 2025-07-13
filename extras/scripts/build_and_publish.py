@@ -37,7 +37,7 @@ def publish(dist_files: list[str]):
         verbose=True,
         repository_name="pypi",
     )
-    twine.commands.upload.upload(settings, *dist_files)
+    twine.commands.upload.upload(settings, dist_files)
 
 
 def main(sdist_dir: Path, publish_to_pypi: bool):
