@@ -81,7 +81,6 @@ def git_tag(version: str):
     push_tag_process = run(f"git push origin v{version}")
 
 
-
 def main(
     patch_release: bool,
     minor_release: bool,
