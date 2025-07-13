@@ -1,0 +1,41 @@
+site_name: SQLModel-YAML Documentation
+site_dir: site
+docs_dir: src
+favicon: img/favicon.ico
+site_url: https://github.com/camratchford/sqlmodel-yaml
+repo_name: camratchford/zenplate
+repo_url: https://github.com/camratchford/sqlmodel-yaml
+plugins:
+  - search:
+      lang: en
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/camratchford/sqlmodel-yaml
+theme:
+  name: material
+extra_css:
+    - static/styles.css
+extra_javascript:
+    - static/scripts.js
+markdown_extensions:
+  - toc:
+      baselevel: 2
+nav:
+  - 'Overview': 'overview.md'
+  - 'Quickstart': 'quickstart.md'
+  - 'Features': 'features.md'
+  - 'Tutorials':
+      - "Subclassing YAMLModel": "tutorials/subclasses.md"
+      - "Integrating with FastAPI": "tutorials/fastapi.md"
+      - "Using YAMLLoader": "tutorials/yamlloader.md"
+      - "Using YAMLDumper": "tutorials/yamldumper.md"
+  - "API Reference":
+      - "YAMLModel": "api_ref/yamlmodel.md"
+      - "YAMLLoader": "api_ref/yamlloader.md"
+      - "YAMLDumper": "api_ref/yamldumper.md"
+  - "Developer's Guide":
+    - 'Testing Reference': 'testing.md'
+    - 'Building Reference': 'building.md'
+
+

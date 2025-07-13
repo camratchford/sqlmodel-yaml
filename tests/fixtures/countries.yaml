@@ -1,0 +1,9 @@
+- !Country
+  display_name: Ashjikistan
+  canonical_name: ashjikistan
+- !Country
+  display_name: Kamzikstan
+  canonical_name: kamzikstan
+- !Country
+  display_name: Cosmoslavia
+  canonical_name: cosmoslavia"""

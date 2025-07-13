@@ -1,0 +1,91 @@
+
+
+[project]
+name = 'sqlmodel-yaml'
+dynamic = ["version"]
+description = 'SQLModel models with dynamically generated PyYAML Constructors and Representors'
+readme = "README.md"
+
+authors = [
+    {name = 'Cam Ratchford', email = 'camratchford@gmail.com'},
+]
+classifiers = [
+    'Development Status :: 3 - Alpha',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 3 :: Only',
+    'Intended Audience :: Developers',
+    'Intended Audience :: Information Technology',
+    'Intended Audience :: System Administrators',
+    'Operating System :: POSIX :: Linux',
+    'Environment :: Console',
+    'Environment :: Win32 (MS Windows)',
+    'Environment :: MacOS X',
+    'Topic :: Software Development :: Libraries :: Python Modules',
+]
+
+requires-python = '>=3.10'
+dependencies = [
+    "annotated-types==0.7.0",
+    "greenlet==3.2.3",
+    "pydantic==2.11.7",
+    "pydantic_core==2.33.2",
+    "PyYAML==6.0.2",
+    "SQLAlchemy==2.0.41",
+    "sqlmodel==0.0.24",
+    "typing-inspection==0.4.1",
+    "typing_extensions==4.14.1",
+]
+
+[project.optional-dependencies]
+development = [
+    "pydantic[email]",
+    "mkdocs",
+    "mkdocs-material",
+    "ruff",
+    "passlib",
+    "pytest",
+    "build",
+    "twine",
+    "fastapi",
+    "uvicorn",
+    "httpx"
+]
+
+[project.urls]
+Homepage = 'https://github.com/camratchford/sqlmodel-yaml'
+Source =  'https://github.com/camratchford/sqlmodel-yaml'
+
+
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["sqlmodel_yaml"]
+package-dir = {"sqlmodel_yaml" = "sqlmodel_yaml"}
+
+[tool.ruff]
+exclude = [
+    "tests/fixtures/**/*"
+]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
+ignore = []
+fixable = ["ALL"]
+unfixable = []
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+docstring-code-format = false
+docstring-code-line-length = "dynamic"
+
+[tool.pytest.ini_options]
+addopts = "-ra -q"
+testpaths = [
+    "tests",
+]
