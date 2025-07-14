@@ -1,24 +1,18 @@
 import re
 import sys
-import subprocess
-from pathlib import Path
 from packaging.version import Version
 import argparse
-from os import getenv
 
 from github import Github
 
-this_directory = Path(__file__).parent
-project_root = this_directory.parent.parent
-pyproject_dot_toml = project_root / "pyproject.toml"
-
-
-def get_current_version() -> Version:
-    content = pyproject_dot_toml.read_text()
-    match = re.search(r'^version\s*=\s*["\'](.+?)["\']', content, re.MULTILINE)
-    if not match:
-        sys.exit("Version not found in pyproject.toml")
-    return Version(match.group(1))
+from sqlmodel_yaml.scripts.script_common import (
+    run,
+    get_current_version,
+    pyproject_dot_toml,
+    package_name,
+    package_installed_as_editable,
+    ScriptEnvironmentError,
+)
 
 
 def get_new_version(version: Version, kind: str) -> str:
@@ -43,19 +37,6 @@ def set_new_version(new_version: str):
         flags=re.MULTILINE,
     )
     pyproject_dot_toml.write_text(new_content)
-
-
-def run(cmd):
-    print(f"Running: {cmd}")
-    return subprocess.run(
-        cmd,
-        shell=True,
-        text=True,
-        cwd=project_root,
-        stderr=subprocess.STDOUT,
-        stdout=subprocess.PIPE,
-        check=False,
-    )
 
 
 def create_release(version: str, github_token: str):
@@ -86,7 +67,6 @@ def main(
     major_release: bool,
     manual_version: bool,
     dry_run: bool = False,
-    do_release: bool = False,
 ) -> None:
     kind = (
         "patch"
@@ -97,9 +77,6 @@ def main(
         if major_release
         else "dev"
     )
-    github_token = getenv("GITHUB_TOKEN")
-    if do_release and not github_token:
-        raise RuntimeError("GITHUB_TOKEN environment variable not set")
 
     current_version = get_current_version()
     new_version = current_version
@@ -110,8 +87,6 @@ def main(
     if not dry_run:
         set_new_version(new_version)
         git_tag(new_version)
-        if do_release:
-            create_release(new_version, github_token)
 
 
 def cli():
@@ -141,16 +116,17 @@ def cli():
         action="store_true",
         help="Only show log messages, do not modify version in any way",
     )
-    parser.add_argument("--do-release", action="store_true", help="Do a GitHub release")
 
     args = parser.parse_args()
+
+    if not package_installed_as_editable():
+        raise ScriptEnvironmentError(package_name, __name__)
 
     main(
         patch_release=args.patch,
         minor_release=args.minor,
         major_release=args.major,
         dry_run=args.dry_run,
-        do_release=args.do_release,
         manual_version=args.manual_version,
     )
 

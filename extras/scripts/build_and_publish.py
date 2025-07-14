@@ -6,7 +6,15 @@ import build
 import twine.commands.upload
 from twine.settings import Settings
 
-default_sdist_path = Path(__file__).parent.parent.parent / "sdist"
+from sqlmodel_yaml.scripts.script_common import (
+    project_root,
+    package_installed_as_editable,
+    ScriptEnvironmentError,
+    check_branch,
+    package_name,
+)
+
+default_sdist_path = project_root / "sdist"
 
 
 def build_python_package(sdist_dir: Path):
@@ -18,14 +26,9 @@ def build_python_package(sdist_dir: Path):
         shutil.rmtree(sdist_dir)
     sdist_dir.mkdir(parents=True, exist_ok=True)
 
-    try:
-        builder = build.ProjectBuilder(project_root)
-        builder.build("wheel", output_directory=str(sdist_dir.absolute()))
-        builder.build("sdist", output_directory=str(sdist_dir.absolute()))
-    except build.BuildException:
-        raise build.BuildException(
-            "Unable to find project root. Did you forget to install the project with 'pip install -e'?"
-        )
+    builder = build.ProjectBuilder(project_root)
+    builder.build("wheel", output_directory=str(sdist_dir.absolute()))
+    builder.build("sdist", output_directory=str(sdist_dir.absolute()))
 
     dist_files = [str(p) for p in sdist_dir.iterdir()]
 
@@ -43,6 +46,7 @@ def publish(dist_files: list[str]):
 def main(sdist_dir: Path, publish_to_pypi: bool):
     dist_files = build_python_package(sdist_dir)
     if publish_to_pypi:
+        check_branch()
         publish(dist_files)
 
 
@@ -58,6 +62,8 @@ def cli():
         "--publish", action="store_true", help="Publish to PyPi after build"
     )
     args = parser.parse_args()
+    if not package_installed_as_editable():
+        raise ScriptEnvironmentError(package_name, __name__)
     main(args.sdist_dir, publish_to_pypi=args.publish)
 
 
