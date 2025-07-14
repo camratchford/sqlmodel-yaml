@@ -26,6 +26,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e .[development]
       - name: Build distribution
-        run: sqlmodel-yaml-build-and-publish
+        run: project-build-and-publish
       - name: Publish
         uses: pypa/gh-action-pypi-publish@v1.12.4
