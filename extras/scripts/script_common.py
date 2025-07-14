@@ -26,7 +26,9 @@ def run(cmd):
 
 def package_installed_as_editable(package: str = package_name) -> bool:
     for path in site.getsitepackages() + [site.getusersitepackages()]:
-        editable_pkgs = [p.name for p in Path(path).iterdir() if p.is_file() and p.suffix == ".pth"]
+        editable_pkgs = [
+            p.name for p in Path(path).iterdir() if p.is_file() and p.suffix == ".pth"
+        ]
         for pkg in editable_pkgs:
             if package in pkg:
                 return True
