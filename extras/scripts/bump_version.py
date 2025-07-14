@@ -67,7 +67,6 @@ def main(
     major_release: bool,
     manual_version: bool,
     dry_run: bool = False,
-    do_release: bool = False,
 ) -> None:
     kind = (
         "patch"
@@ -117,7 +116,6 @@ def cli():
         action="store_true",
         help="Only show log messages, do not modify version in any way",
     )
-    parser.add_argument("--do-release", action="store_true", help="Do a GitHub release")
 
     args = parser.parse_args()
 
@@ -129,7 +127,6 @@ def cli():
         minor_release=args.minor,
         major_release=args.major,
         dry_run=args.dry_run,
-        do_release=args.do_release,
         manual_version=args.manual_version,
     )
 
