@@ -1,23 +1,13 @@
-import subprocess
 from argparse import ArgumentParser
-from pathlib import Path
-from sys import exit
 
-this_directory = Path(__file__).parent
-project_root = this_directory.parent.parent
-
-
-def run(cmd):
-    print(f"Running: {cmd}")
-    return subprocess.run(
-        cmd,
-        shell=True,
-        text=True,
-        cwd=project_root,
-        stderr=subprocess.STDOUT,
-        stdout=subprocess.PIPE,
-        check=False,
-    )
+from sqlmodel_yaml.scripts.script_common import (
+    project_root,
+    run,
+    package_installed_as_editable,
+    ScriptEnvironmentError,
+    check_subprocess_for_errors,
+    package_name,
+)
 
 
 def main(directories: list[str], test_mode: bool):
@@ -30,14 +20,9 @@ def main(directories: list[str], test_mode: bool):
     check_process = run(f"ruff check --show-fixes --fix {check_test_arg} {dir_arg}")
     format_process = run(f"ruff format {format_test_arg} {dir_arg}")
 
-    # return code will be zero if both pass
     if test_mode:
-        if check_process.returncode != 0:
-            print(f"::error:: ruff check encountered changes: {check_process.stdout}")
-        if format_process.returncode != 0:
-            print(f"::error:: ruff format encountered changes: {format_process.stdout}")
-
-        exit(check_process.returncode + format_process.returncode)
+        check_subprocess_for_errors(check_process)
+        check_subprocess_for_errors(format_process)
 
 
 def cli():
@@ -51,18 +36,20 @@ def cli():
         "--directories",
         nargs="+",
         help="List of directories to format and lint",
-        default=["sqlmodel_yaml", "tests", "extras/examples", "extras/scripts"],
+        default=["."],
     )
     args = parser.parse_args()
     dir_paths = [project_root / directory for directory in args.directories]
     missing_paths = [d for d in dir_paths if not d.exists()]
     if missing_paths:
         paths_str = " ".join(str(i) for i in missing_paths)
-        raise ValueError(
+        raise ScriptEnvironmentError(
             f"Some directories are not accessible: {paths_str}. "
             f"Did forget to install this pacakge with 'pip install -e'?"
-            f""
         )
+
+    if not package_installed_as_editable():
+        raise ScriptEnvironmentError(package_name, __name__)
 
     main(directories=args.directories, test_mode=args.test)
 

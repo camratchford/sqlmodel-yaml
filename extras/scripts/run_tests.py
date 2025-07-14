@@ -1,22 +1,15 @@
-import subprocess
-from pathlib import Path
-
-
-this_directory = Path(__file__).parent
-project_root = this_directory.parent.parent
-
-
-def run(cmd, check=True):
-    print(f"Running: {cmd}")
-    subprocess.run(cmd, shell=True, check=check, cwd=project_root)
+from sqlmodel_yaml.scripts.script_common import (
+    run,
+    package_installed_as_editable,
+    ScriptEnvironmentError,
+    package_name,
+)
 
 
 def cli():
-    if not project_root.joinpath("tests").exists():
-        raise ValueError(
-            "The tests directory is not available. "
-            "Did forget to install this pacakge with 'pip install -e'?"
-        )
+    if not package_installed_as_editable():
+        raise ScriptEnvironmentError(package_name, __name__)
+
     run("pytest ./tests")
 
 

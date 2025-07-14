@@ -25,4 +25,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e .[development]
       - name: Format and lint
-        run: sqlmodel-yaml-format-and-lint --test
+        run: |
+          sqlmodel-yaml-format-and-lint --test \
+            --directories "sqlmodel_yaml" "tests" "extras/examples" "extras/scripts"
