@@ -16,8 +16,8 @@ def create_release(version: str, github_token: str, release_notes: str):
     github_repo = github_client.get_repo("camratchford/sqlmodel-yaml")
 
     release = github_repo.create_git_release(
-        tag=version,
-        name=version,
+        tag=str(version),
+        name=str(version),
         message=release_notes,
         draft=False,
         prerelease=False,
