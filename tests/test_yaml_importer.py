@@ -11,6 +11,9 @@ from mocks import (
     create_db_and_tables,
     static_file_list_paths,
     static_file_list_paths_jumbled,
+    get_country_by_name,
+    users_templates_path,
+    create_country,
 )
 
 
@@ -65,8 +68,17 @@ def test_yaml_loader_load():
     create_db_and_tables()
     importer = YAMLLoader(countries_path, engine)
     with Session(engine) as session:
-        countries = importer.load(session)
+        countries = importer.load_all(session)
     assert len(countries) == 3
+
+
+def test_jinja():
+    create_db_and_tables()
+    jinja_vars = {"get_country_by_name": get_country_by_name}
+    importer = YAMLLoader()
+    create_country("Rootzikstan", "rootzikstan")
+    with Session(engine) as session:
+        importer.load_template_file(session, users_templates_path, jinja_vars)
 
 
 if __name__ == "__main__":

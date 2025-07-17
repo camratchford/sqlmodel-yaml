@@ -1,6 +1,11 @@
 from pathlib import Path
-from sqlmodel import create_engine, Field, Relationship
+from datetime import datetime
+
+from sqlmodel import create_engine, Field, Relationship, Session, select
+from pydantic import EmailStr
+
 from sqlmodel_yaml import YAMLModel
+
 
 country_data_dict = [
     {"display_name": "Ashjikistan", "canonical_name": "ashjikistan"},
@@ -123,11 +128,14 @@ static_file_list_paths = [fixtures_path / p for p in static_file_list]
 static_file_list_paths_jumbled = [fixtures_path / p for p in static_file_list_jumbled]
 static_file_list_strings = [str(p) for p in static_file_list_paths]
 
+users_templates_path = fixtures_path / "users/user_with_country_lookup.yml"
+
 
 class Country(YAMLModel, table=True):
     canonical_name: str = Field(alias="cname", default=None, primary_key=True)
     display_name: str = Field(alias="name")
     cities: list["City"] = Relationship(back_populates="country")
+    users: list["User"] = Relationship(back_populates="country")
 
 
 class City(YAMLModel, table=True):
@@ -135,6 +143,49 @@ class City(YAMLModel, table=True):
     display_name: str = Field(alias="name")
     country_cname: str = Field(default=None, foreign_key="country.canonical_name")
     country: Country = Relationship(back_populates="cities")
+
+
+class UserBase(YAMLModel):
+    name: str = Field()
+    email: EmailStr = Field()
+    username: str = Field(unique=True)
+    date_created: datetime = Field(default_factory=datetime.now)
+
+
+class User(UserBase, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    country_cname: str | None = Field(
+        nullable=True, default=None, foreign_key="country.canonical_name"
+    )
+    country: Country = Relationship(back_populates="users")
+    hashed_password: str = Field()
+
+
+class UserCreate(UserBase):
+    password: str
+
+
+class UserPublic(UserBase):
+    id: int
+
+
+class UserUpdate(YAMLModel):
+    name: str | None = None
+    password: str = None
+
+
+def create_country(name: str, cname: str):
+    with Session(engine) as session:
+        country = Country(display_name=name, canonical_name=cname)
+        session.add(country)
+        session.commit()
+        session.refresh(country)
+        return country
+
+
+def get_country_by_name(name: str):
+    with Session(engine) as session:
+        return session.exec(select(Country).where(Country.display_name == name)).first()
 
 
 def create_db_and_tables():

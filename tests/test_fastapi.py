@@ -1,42 +1,21 @@
-from datetime import datetime
+from sqlmodel import Session
 
-from sqlmodel import Field, Session
 from passlib.hash import pbkdf2_sha256
-from pydantic import EmailStr
 import fastapi
 from fastapi.testclient import TestClient
 
-from sqlmodel_yaml.model import YAMLModel
 from sqlmodel import select
 
-from mocks import create_user_data, create_db_and_tables, engine
+from mocks import (
+    create_user_data,
+    create_db_and_tables,
+    engine,
+    UserCreate,
+    UserPublic,
+    User,
+)
 
 app = fastapi.FastAPI()
-
-
-class UserBase(YAMLModel):
-    name: str = Field()
-    email: EmailStr = Field()
-    username: str = Field(unique=True)
-    date_created: datetime = Field(default_factory=datetime.now)
-
-
-class User(UserBase, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    hashed_password: str = Field()
-
-
-class UserCreate(UserBase):
-    password: str
-
-
-class UserPublic(UserBase):
-    id: int
-
-
-class UserUpdate(YAMLModel):
-    name: str | None = None
-    password: str = None
 
 
 def hash_password(password: str) -> str:
