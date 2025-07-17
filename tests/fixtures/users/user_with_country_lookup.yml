@@ -1,0 +1,9 @@
+
+
+- !User
+  name: root
+  email: root@example.com
+  username: root
+  # 'password'
+  hashed_password: $pbkdf2-sha256$29000$3HuvNWbMWet97x3DeM9ZKw$ddA/30W9tE/n7Jw8im3xq4IU.jooCHtCmjYyD0leBdc
+  country_cname: "{{ get_country_by_name('Rootzikstan').canonical_name }}"

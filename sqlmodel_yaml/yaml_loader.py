@@ -3,6 +3,8 @@ from pathlib import Path
 
 import yaml
 from sqlmodel import Session
+from jinja2 import Template
+
 from sqlmodel_yaml import YAMLModel
 
 YamlSuffixes = frozenset([".yaml", ".yml"])
@@ -34,17 +36,18 @@ def null_sort_function(path_list: list[Path], _) -> list[Path]:
 class YAMLLoader:
     def __init__(
         self,
-        path_or_path_list: AnyPathType,
+        path_or_path_list: AnyPathType = None,
         recurse: bool = False,
         reversed_sort: bool = False,
-        importer_sort_function: ImporterSortFunctionType = default_importer_sort_function,
+        importer_sort_function: ImporterSortFunctionType = default_importer_sort_function
     ):
         self.reversed_sort = reversed_sort
         if importer_sort_function is None:
             importer_sort_function = null_sort_function
         self.importer_sort_function = importer_sort_function
+        if path_or_path_list is not None:
+            self.sorted_path_list = self.generate_path_list(path_or_path_list, recurse)
 
-        self.sorted_path_list = self.generate_path_list(path_or_path_list, recurse)
 
     def generate_path_list(
         self, path_or_path_list: AnyPathType, recurse: bool = False
@@ -76,21 +79,30 @@ class YAMLLoader:
     def list_paths(self):
         return self.sorted_path_list
 
-    def load(self, session: Session) -> list["YAMLModel"]:
+    def load_template_file(self, session: Session, path: Path, jinja_vars: dict) -> dict:
+        path_text = path.read_text()
+        rendered_text = Template(path_text).render(**jinja_vars)
+        return self._load(session, rendered_text)
+
+    def load_all(self, session: Session) -> list["YAMLModel"]:
+        objects = []
         for path in self.sorted_path_list:
-            loaded_yaml_objs = yaml.load(path.read_text(), Loader=yaml.FullLoader)
+            objects.append(self._load(session, path))
+        return objects
 
-            if not hasattr(loaded_yaml_objs, "__iter__"):
-                loaded_yaml_objs = [loaded_yaml_objs]
+    def _load(self, session: Session, yaml_text: str):
+        loaded_yaml_objs = yaml.load(yaml_text, Loader=yaml.FullLoader)
+        if not hasattr(loaded_yaml_objs, "__iter__"):
+            loaded_yaml_objs = [loaded_yaml_objs]
 
-            if isinstance(loaded_yaml_objs, dict):
-                loaded_yaml_objs = list(loaded_yaml_objs.values())
+        if isinstance(loaded_yaml_objs, dict):
+            loaded_yaml_objs = list(loaded_yaml_objs.values())
 
-            objects: list[YAMLModel] = []
-            for yaml_obj in loaded_yaml_objs:
-                session.add(yaml_obj)
-                session.commit()
-                session.refresh(yaml_obj)
-                objects.append(yaml_obj)
+        objects: list[YAMLModel] = []
+        for yaml_obj in loaded_yaml_objs:
+            session.add(yaml_obj)
+            session.commit()
+            session.refresh(yaml_obj)
+            objects.append(yaml_obj.copy())
 
-            return objects
+        return objects
