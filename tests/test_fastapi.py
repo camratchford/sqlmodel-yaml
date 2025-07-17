@@ -1,4 +1,3 @@
-
 from sqlmodel import Session
 
 from passlib.hash import pbkdf2_sha256
@@ -7,10 +6,16 @@ from fastapi.testclient import TestClient
 
 from sqlmodel import select
 
-from mocks import create_user_data, create_db_and_tables, engine, UserCreate, UserPublic, User
+from mocks import (
+    create_user_data,
+    create_db_and_tables,
+    engine,
+    UserCreate,
+    UserPublic,
+    User,
+)
 
 app = fastapi.FastAPI()
-
 
 
 def hash_password(password: str) -> str:

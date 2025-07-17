@@ -39,7 +39,7 @@ class YAMLLoader:
         path_or_path_list: AnyPathType = None,
         recurse: bool = False,
         reversed_sort: bool = False,
-        importer_sort_function: ImporterSortFunctionType = default_importer_sort_function
+        importer_sort_function: ImporterSortFunctionType = default_importer_sort_function,
     ):
         self.reversed_sort = reversed_sort
         if importer_sort_function is None:
@@ -47,7 +47,6 @@ class YAMLLoader:
         self.importer_sort_function = importer_sort_function
         if path_or_path_list is not None:
             self.sorted_path_list = self.generate_path_list(path_or_path_list, recurse)
-
 
     def generate_path_list(
         self, path_or_path_list: AnyPathType, recurse: bool = False
@@ -79,7 +78,9 @@ class YAMLLoader:
     def list_paths(self):
         return self.sorted_path_list
 
-    def load_template_file(self, session: Session, path: Path, jinja_vars: dict) -> dict:
+    def load_template_file(
+        self, session: Session, path: Path, jinja_vars: dict
+    ) -> dict:
         path_text = path.read_text()
         rendered_text = Template(path_text).render(**jinja_vars)
         return self._load(session, rendered_text)

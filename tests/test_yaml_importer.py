@@ -13,7 +13,7 @@ from mocks import (
     static_file_list_paths_jumbled,
     get_country_by_name,
     users_templates_path,
-    create_country
+    create_country,
 )
 
 
@@ -78,7 +78,6 @@ def test_jinja():
     importer = YAMLLoader()
     create_country("Rootzikstan", "rootzikstan")
     with Session(engine) as session:
-
         importer.load_template_file(session, users_templates_path, jinja_vars)
 
 

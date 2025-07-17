@@ -154,7 +154,9 @@ class UserBase(YAMLModel):
 
 class User(UserBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    country_cname: str | None = Field(nullable=True, default=None, foreign_key="country.canonical_name")
+    country_cname: str | None = Field(
+        nullable=True, default=None, foreign_key="country.canonical_name"
+    )
     country: Country = Relationship(back_populates="users")
     hashed_password: str = Field()
 
@@ -189,4 +191,3 @@ def get_country_by_name(name: str):
 def create_db_and_tables():
     YAMLModel.metadata.drop_all(engine)
     YAMLModel.metadata.create_all(engine)
-
